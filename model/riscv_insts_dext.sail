@@ -212,11 +212,11 @@ function feq_quiet_D   (v1,       v2) = {
 
   let result = ((v1 == v2) | (v1Is0 & v2Is0));
 
-  let fflags = if   (f_is_SNaN_D(v1) | f_is_SNaN_D(v2))
+  let f_flags = if   (f_is_SNaN_D(v1) | f_is_SNaN_D(v2))
                then nvFlag()
                else zeros();
 
-  (result, fflags)
+  (result, f_flags)
 }
 
 val      flt_D : (bits(64), bits (64), bool) -> (bool, bits(5))
@@ -238,7 +238,7 @@ function flt_D   (v1,       v2,        is_quiet) = {
       then unsigned (m1) > unsigned (m2)
       else unsigned (e1) > unsigned (e2);
 
-  let fflags = if is_quiet then
+  let f_flags = if is_quiet then
                  if   (f_is_SNaN_D(v1) | f_is_SNaN_D(v2))
                  then nvFlag()
                  else zeros()
@@ -247,7 +247,7 @@ function flt_D   (v1,       v2,        is_quiet) = {
                  then nvFlag()
                  else zeros();
 
-  (result, fflags)
+  (result, f_flags)
 }
 
 val      fle_D : (bits(64), bits (64), bool) -> (bool, bits(5))
@@ -272,7 +272,7 @@ function fle_D   (v1,       v2,        is_quiet) = {
       then unsigned (m1) >=  unsigned (m2)
       else unsigned (e1)  >  unsigned (e2);
 
-  let fflags = if is_quiet then
+  let f_flags = if is_quiet then
                  if   (f_is_SNaN_D(v1) | f_is_SNaN_D(v2))
                  then nvFlag()
                  else zeros()
@@ -281,7 +281,7 @@ function fle_D   (v1,       v2,        is_quiet) = {
                  then nvFlag()
                  else zeros();
 
-  (result, fflags)
+  (result, f_flags)
 }
 
 /* ****************************************************************** */
@@ -327,14 +327,14 @@ function clause execute (F_MADD_TYPE_D(rs3, rs2, rs1, rm, rd, op)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_64b) : (bits(5), bits(64)) =
+      let (f_flags, rd_val_64b) : (bits(5), bits(64)) =
         match op {
           FMADD_D  => riscv_f64MulAdd (rm_3b, rs1_val_64b, rs2_val_64b, rs3_val_64b),
           FMSUB_D  => riscv_f64MulAdd (rm_3b, rs1_val_64b, rs2_val_64b, negate_D (rs3_val_64b)),
           FNMSUB_D => riscv_f64MulAdd (rm_3b, negate_D (rs1_val_64b), rs2_val_64b, rs3_val_64b),
           FNMADD_D => riscv_f64MulAdd (rm_3b, negate_D (rs1_val_64b), rs2_val_64b, negate_D (rs3_val_64b))
         };
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_64b;
       RETIRE_SUCCESS
     }
@@ -392,13 +392,13 @@ function clause execute (F_BIN_RM_TYPE_D(rs2, rs1, rm, rd, op)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_64b) : (bits(5), bits(64)) = match op {
+      let (f_flags, rd_val_64b) : (bits(5), bits(64)) = match op {
         FADD_D  => riscv_f64Add (rm_3b, rs1_val_64b, rs2_val_64b),
         FSUB_D  => riscv_f64Sub (rm_3b, rs1_val_64b, rs2_val_64b),
         FMUL_D  => riscv_f64Mul (rm_3b, rs1_val_64b, rs2_val_64b),
         FDIV_D  => riscv_f64Div (rm_3b, rs1_val_64b, rs2_val_64b)
       };
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_64b;
       RETIRE_SUCCESS
     }
@@ -484,9 +484,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FSQRT_D)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_D) = riscv_f64Sqrt   (rm_3b, rs1_val_D);
+      let (f_flags, rd_val_D) = riscv_f64Sqrt   (rm_3b, rs1_val_D);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_D;
       RETIRE_SUCCESS
     }
@@ -499,9 +499,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_W_D)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_W) = riscv_f64ToI32 (rm_3b, rs1_val_D);
+      let (f_flags, rd_val_W) = riscv_f64ToI32 (rm_3b, rs1_val_D);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       X(rd) = EXTS (rd_val_W);
       RETIRE_SUCCESS
     }
@@ -514,9 +514,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_WU_D)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_WU) = riscv_f64ToUi32 (rm_3b, rs1_val_D);
+      let (f_flags, rd_val_WU) = riscv_f64ToUi32 (rm_3b, rs1_val_D);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       X(rd) = EXTS (rd_val_WU);
       RETIRE_SUCCESS
     }
@@ -529,9 +529,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_D_W)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_D) = riscv_i32ToF64 (rm_3b, rs1_val_W);
+      let (f_flags, rd_val_D) = riscv_i32ToF64 (rm_3b, rs1_val_W);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_D;
       RETIRE_SUCCESS
     }
@@ -544,9 +544,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_D_WU)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_D) = riscv_ui32ToF64 (rm_3b, rs1_val_WU);
+      let (f_flags, rd_val_D) = riscv_ui32ToF64 (rm_3b, rs1_val_WU);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_D;
       RETIRE_SUCCESS
     }
@@ -559,9 +559,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_S_D)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_S) = riscv_f64ToF32 (rm_3b, rs1_val_D);
+      let (f_flags, rd_val_S) = riscv_f64ToF32 (rm_3b, rs1_val_D);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = nan_box (rd_val_S);
       RETIRE_SUCCESS
     }
@@ -574,9 +574,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_D_S)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_D) = riscv_f32ToF64 (rm_3b, rs1_val_S);
+      let (f_flags, rd_val_D) = riscv_f32ToF64 (rm_3b, rs1_val_S);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_D;
       RETIRE_SUCCESS
     }
@@ -589,9 +589,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_L_D)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_L) = riscv_f64ToI64 (rm_3b, rs1_val_D);
+      let (f_flags, rd_val_L) = riscv_f64ToI64 (rm_3b, rs1_val_D);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       X(rd) = rd_val_L;
       RETIRE_SUCCESS
     }
@@ -604,9 +604,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_LU_D)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_LU) = riscv_f64ToUi64 (rm_3b, rs1_val_D);
+      let (f_flags, rd_val_LU) = riscv_f64ToUi64 (rm_3b, rs1_val_D);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       X(rd) = rd_val_LU;
       RETIRE_SUCCESS
     }
@@ -619,9 +619,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_D_L)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_D) = riscv_i64ToF64 (rm_3b, rs1_val_L);
+      let (f_flags, rd_val_D) = riscv_i64ToF64 (rm_3b, rs1_val_L);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_D;
       RETIRE_SUCCESS
     }
@@ -634,9 +634,9 @@ function clause execute (F_UN_RM_TYPE_D(rs1, rm, rd, FCVT_D_LU)) = {
     None() => { handle_illegal(); RETIRE_FAIL },
     Some(rm') => {
       let rm_3b = encdec_rounding_mode(rm');
-      let (fflags, rd_val_D) = riscv_ui64ToF64 (rm_3b, rs1_val_LU);
+      let (f_flags, rd_val_D) = riscv_ui64ToF64 (rm_3b, rs1_val_LU);
 
-      write_fflags(fflags);
+      write_fflags(f_flags);
       F(rd) = rd_val_D;
       RETIRE_SUCCESS
     }
@@ -800,7 +800,7 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FMIN_D)) = {
   let rs2_val_D = F(rs2);
 
   let is_quiet  = true;
-  let (rs1_lt_rs2, fflags) = fle_D (rs1_val_D, rs2_val_D, is_quiet);
+  let (rs1_lt_rs2, f_flags) = fle_D (rs1_val_D, rs2_val_D, is_quiet);
 
   let rd_val_D  = if      (f_is_NaN_D(rs1_val_D) & f_is_NaN_D(rs2_val_D))           then canonical_NaN_D()
                   else if f_is_NaN_D(rs1_val_D)                                     then rs2_val_D
@@ -810,7 +810,7 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FMIN_D)) = {
                   else if rs1_lt_rs2                                                then rs1_val_D
                   else /* (not rs1_lt_rs2) */                                            rs2_val_D;
 
-  accrue_fflags(fflags);
+  accrue_fflags(f_flags);
   F(rd) = rd_val_D;
   RETIRE_SUCCESS
 }
@@ -820,7 +820,7 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FMAX_D)) = {
   let rs2_val_D = F(rs2);
 
   let is_quiet  = true;
-  let (rs2_lt_rs1, fflags) = fle_D (rs2_val_D, rs1_val_D, is_quiet);
+  let (rs2_lt_rs1, f_flags) = fle_D (rs2_val_D, rs1_val_D, is_quiet);
 
   let rd_val_D  = if      (f_is_NaN_D(rs1_val_D) & f_is_NaN_D(rs2_val_D))           then canonical_NaN_D()
                   else if f_is_NaN_D(rs1_val_D)                                     then rs2_val_D
@@ -830,7 +830,7 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FMAX_D)) = {
                   else if rs2_lt_rs1                                                then rs1_val_D
                   else /* (not rs2_lt_rs1) */                                            rs2_val_D;
 
-  accrue_fflags(fflags);
+  accrue_fflags(f_flags);
   F(rd) = rd_val_D;
   RETIRE_SUCCESS
 }
@@ -839,10 +839,10 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FEQ_D)) = {
   let rs1_val_D = F(rs1);
   let rs2_val_D = F(rs2);
 
-  let (fflags, rd_val) : (bits_fflags, bits_LU) =
+  let (f_flags, rd_val) : (bits_fflags, bits_LU) =
       riscv_f64Eq (rs1_val_D, rs2_val_D);
 
-  write_fflags(fflags);
+  write_fflags(f_flags);
   X(rd) = rd_val;
   RETIRE_SUCCESS
 }
@@ -851,10 +851,10 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FLT_D)) = {
   let rs1_val_D = F(rs1);
   let rs2_val_D = F(rs2);
 
-  let (fflags, rd_val) : (bits_fflags, bits_LU) =
+  let (f_flags, rd_val) : (bits_fflags, bits_LU) =
       riscv_f64Lt (rs1_val_D, rs2_val_D);
 
-  write_fflags(fflags);
+  write_fflags(f_flags);
   X(rd) = rd_val;
   RETIRE_SUCCESS
 }
@@ -863,10 +863,10 @@ function clause execute (F_BIN_TYPE_D(rs2, rs1, rd, FLE_D)) = {
   let rs1_val_D = F(rs1);
   let rs2_val_D = F(rs2);
 
-  let (fflags, rd_val) : (bits_fflags, bits_LU) =
+  let (f_flags, rd_val) : (bits_fflags, bits_LU) =
       riscv_f64Le (rs1_val_D, rs2_val_D);
 
-  write_fflags(fflags);
+  write_fflags(f_flags);
   X(rd) = rd_val;
   RETIRE_SUCCESS
 }

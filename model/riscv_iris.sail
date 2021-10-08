@@ -1184,7 +1184,7 @@ function fetch() -> FetchResult =
         }
       }
     }
-    
+
 /* The emulator fetch-execute-interrupt dispatch loop. */
 
 /* returns whether to increment the step count in the trace */
