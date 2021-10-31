@@ -89,6 +89,7 @@ function is_CSR_defined (csr : csreg, p : Privilege) -> bool =
     0x304 => p == Machine, // mie
     0x305 => p == Machine, // mtvec
     0x306 => p == Machine & haveUsrMode(), // mcounteren
+    0x30a => p == Machine, //menvcfg
     0x310 => p == Machine & (sizeof(xlen) == 32), // mstatush
     0x320 => p == Machine, // mcountinhibit
     /* machine mode: trap handling */
@@ -137,6 +138,8 @@ function is_CSR_defined (csr : csreg, p : Privilege) -> bool =
     0x104 => haveSupMode() & (p == Machine | p == Supervisor), // sie
     0x105 => haveSupMode() & (p == Machine | p == Supervisor), // stvec
     0x106 => haveSupMode() & (p == Machine | p == Supervisor), // scounteren
+
+    0x10a => haveSupMode() & (p == Machine | p == Supervisor), //senvcfg
 
     /* supervisor mode: trap handling */
     0x140 => haveSupMode() & (p == Machine | p == Supervisor), // sscratch
@@ -592,6 +595,8 @@ function init_sys() -> unit = {
 
   minstret           = EXTZ(0b0);
   minstret_written   = false;
+
+  menvcfg->bits() = EXTZ(0b0);
 
   init_pmp();
 

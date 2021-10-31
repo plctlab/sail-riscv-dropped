@@ -381,7 +381,8 @@ enum sop = {RISCV_SLLI, RISCV_SRLI, RISCV_SRAI}   /* shift ops */
 enum rop = {RISCV_ADD, RISCV_SUB, RISCV_SLL, RISCV_SLT,
             RISCV_SLTU, RISCV_XOR, RISCV_SRL, RISCV_SRA,
             RISCV_OR, RISCV_AND}                  /* reg-reg ops */
-
+enum cbop = {CBO_CLEAN, CBO_FLUSH, CBO_INVAL, CBO_ZERO}
+enum preop = {PREFETCH_I, PREFETCH_R, PREFETCH_W}
 enum ropw  = {RISCV_ADDW, RISCV_SUBW, RISCV_SLLW,
               RISCV_SRLW, RISCV_SRAW}             /* reg-reg 32-bit ops */
 enum sopw = {RISCV_SLLIW, RISCV_SRLIW,

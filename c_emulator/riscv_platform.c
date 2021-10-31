@@ -45,6 +45,9 @@ mach_bits plat_rom_base(unit u)
 mach_bits plat_rom_size(unit u)
 { return rv_rom_size; }
 
+mach_bits plat_cache_block_size()
+{ return rv_cache_block_size; }
+
 // Provides entropy for the scalar cryptography extension.
 mach_bits plat_get_16_random_bits()
 { return rv_16_random_bits(); }

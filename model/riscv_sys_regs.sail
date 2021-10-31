@@ -799,3 +799,18 @@ function read_seed_csr() -> xlenbits = {
 
 /* Writes to the seed CSR are ignored */
 function write_seed_csr () -> option(xlenbits) = None()
+
+bitfield Envcfg : xlenbits = {
+  CBZE  : 7,
+  CBCFE : 6,
+  CBIE  : 5 .. 4
+}
+register senvcfg : Envcfg
+register menvcfg : Envcfg
+
+function legalize_envcfg(c : Envcfg, v : xlenbits) -> Envcfg = {
+  let c = update_CBZE(c, [v[7]]);
+  let c = update_CBCFE(c, [v[6]]);
+  let c = update_CBIE(c, v[5 .. 4]);
+  c
+}

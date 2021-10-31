@@ -111,6 +111,8 @@ mapping clause csr_name_map = 0x143  <-> "stval"
 mapping clause csr_name_map = 0x144  <-> "sip"
 /* supervisor protection and translation */
 mapping clause csr_name_map = 0x180  <-> "satp"
+/* supervisor envcfg */
+mapping clause csr_name_map = 0x10A  <-> "senvcfg"
 /* machine information registers */
 mapping clause csr_name_map = 0xF11  <-> "mvendorid"
 mapping clause csr_name_map = 0xF12  <-> "marchid"
@@ -157,6 +159,8 @@ mapping clause csr_name_map = 0xB00  <-> "mcycle"
 mapping clause csr_name_map = 0xB02  <-> "minstret"
 mapping clause csr_name_map = 0xB80  <-> "mcycleh"
 mapping clause csr_name_map = 0xB82  <-> "minstreth"
+/* machine envcfg */
+mapping clause csr_name_map = 0x30A  <-> "menvcfg"
 /* TODO: other hpm counters and events */
 /* trigger/debug */
 mapping clause csr_name_map = 0x7a0  <-> "tselect"

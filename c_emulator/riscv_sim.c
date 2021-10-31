@@ -130,6 +130,7 @@ static struct option options[] = {
 #ifdef SAILCOV
   {"sailcov-file",                required_argument, 0, 'c'},
 #endif
+  {"cache-block-size",            required_argument, 0, 'B'},
   {0, 0, 0, 0}
 };
 
@@ -212,6 +213,7 @@ char *process_args(int argc, char **argv)
 {
   int c;
   uint64_t ram_size = 0;
+  uint64_t block_size = 0;
   while(true) {
     c = getopt_long(argc, argv,
                     "a"
@@ -239,6 +241,7 @@ char *process_args(int argc, char **argv)
 #ifdef SAILCOV
                     "c:"
 #endif
+                    "B:"
                          , options, NULL);
     if (c == -1) break;
     switch (c) {
@@ -330,6 +333,16 @@ char *process_args(int argc, char **argv)
       sailcov_file = strdup(optarg);
       break;
 #endif
+    case 'B':
+      block_size = atol(optarg);
+      if (((block_size & 7) == 0) && (block_size < 4096)) {
+        fprintf(stderr, "setting cache-block-size to %" PRIu64 " B\n", block_size);
+        rv_cache_block_size = block_size;
+      } else {
+        fprintf(stderr, "invalid cache-block-size '%s' provided.\n", optarg);
+        exit(1);
+      }
+      break;
     case '?':
       print_usage(argv[0], 1);
       break;
